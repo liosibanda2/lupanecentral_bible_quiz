@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Lupane Central Church Quiz</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: arial, sans-serif; background: #f4f7fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+    .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 90%; max-width: 600px; }
+        h2, h3 { text-align: center; color: #2c3e50; }
+        input, select, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; }
+        button { background: #4a5cf7; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background: #3742fa; }
+    .option { background: #f0f0f0; padding: 12px; margin: 8px 0; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+    .option:hover { background: #e0e0e0; }
+    .correct { background: #2ecc71!important; color: white; }
+    .wrong { background: #e74c3c!important; color: white; }
+    .hidden { display: none!important; }
+    .btn-secondary { background: #7f8c8d; }
+    .btn-secondary:hover { background: #636e72; }
+    .result-item { background: #f0f0f0; padding: 10px; margin: 5px 0; border-radius: 8px; font-size: 14px; }
+    .category-tag { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 12px; color: white; margin-left: 8px; font-weight: bold; }
+    .adventurer { background: #3498db; }
+    .pathfinder { background: #2ecc71; }
+    .ambassador { background: #e67e22; }
+    .senioryouth { background: #9b59b6; }
+    .test { background: #7f8c8d; }
+    .participant-welcome { text-align: center; font-style: italic; color: #34495e; font-weight: bold; margin-bottom: 15px; }
+    .filter-buttons { display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
+    .filter-buttons button { flex: 1; padding: 8px; font-size: 14px; min-width: 90px; }
+    .filter-active { outline: 2px solid #2c3e50; }
+        label { font-size: 14px; color: #34495e; font-weight: bold; margin-top: 10px; display: block; }
+    </style>
+</head>
+<body>
+
+    <div class="card" id="login-screen">
+        <h2>Lupane Central Bible Quiz 2026</h2>
+        <p style="text-align: center; color: #7f8c8d;">Enter details to start</p>
+
+        <label>Select Book:</label>
+        <select id="bookSelect">
+            <option value="ezekiel">Book of Ezekiel</option>
+            <option value="revelation">Book of Revelation</option>
+            <option value="acts">Book of Acts</option>
+            <option value="obadiah">Book of Obadiah</option>
+            <option value="greatcontroversy">The Great Controversy</option>
+        </select>
+
+        <label>Full Name:</label>
+        <input type="text" id="username" placeholder="John Doe">
+
+        <label>User-Code:</label>
+        <input type="text" id="usercode" placeholder="adv001, path002, amb003, young004">
+
+        <button onclick="login()">Log In</button>
+        <button class="btn-secondary" onclick="viewresults()">View Saved Results</button>
+    </div>
+
+    <div class="card hidden" id="quiz-screen">
+        <h3 id="quiz-title">Bible Quiz</h3>
+        <div id="welcome-message" class="participant-welcome"></div>
+        <div id="progress" style="text-align: right; color: #7f8c8d; font-size: 14px;"></div>
+        <p id="question-text" style="font-size: 18px; font-weight: bold; margin: 20px 0;"></p>
+        <div id="options-container"></div>
+    </div>
+
+    <div class="card hidden" id="results-screen">
+        <h3>Saved Results</h3>
+        <div class="filter-buttons">
+            <button onclick="filterResults('ALL')" id="btn-ALL" class="filter-active">All</button>
+            <button onclick="filterResults('Adventurer')" id="btn-Adventurer" class="adventurer">Adventurer</button>
+            <button onclick="filterResults('Pathfinder')" id="btn-Pathfinder" class="pathfinder">Pathfinder</button>
+            <button onclick="filterResults('Ambassador')" id="btn-Ambassador" class="ambassador">Ambassador</button>
+            <button onclick="filterResults('Senior Youth')" id="btn-Senior Youth" class="senioryouth">Senior Youth</button>
+        </div>
+        <div id="results-list" style="max-height: 300px; overflow-y: auto; margin-bottom: 15px;"></div>
+        <button class="btn-secondary" onclick="showScreen('login-screen')">Back to Login</button>
+    </div>
+
+    <script>
+        const questionSets = {
+            ezekiel: {
+                name: "Book of Ezekiel",
+                questions: [
+                    { q: "How many chapters does the book of Ezekiel have?", o: ["36", "48", "52", "40"], a: 1 },
+                    { q: "Who is said to be the Priest, the Son of Buzi?", o: ["Isaiah", "Jeremiah", "Ezekiel", "Daniel"], a: 2 },
+                    { q: "What was offered for Ezekiel to eat?", o: ["Bread", "Manna", "A scroll", "Fruit"], a: 2 },
+                    { q: "Spell the word: Jehoiachin", o: ["Jehoiakim", "Jehoiachin", "Jeconiah", "Zedekiah"], a: 1 },
+                    { q: "In which year and month did Ezekiel see a vision?", o: ["First year, first month", "Thirtieth year, fourth month", "Fifth year, seventh month", "Tenth year, second month"], a: 1 },
+                    { q: "What was Ezekiel's job before God called him as a prophet?", o: ["Shepherd", "Priest", "Fisherman", "Carpenter"], a: 1 },
+                    { q: "Where was Ezekiel when God called him?", o: ["Jerusalem", "By the Chebar River in Babylon", "Mount Sinai", "Egypt"], a: 1 },
+                    { q: "Ezekiel had a famous vision of what coming to life?", o: ["Dead sea", "Dry bones", "Fallen trees", "Stone idols"], a: 1 },
+                    { q: "Which name is used 90 times in the book of Ezekiel?", o: ["Son of God", "Son of Man", "Servant of God", "Prophet"], a: 1 },
+                    { q: "As I looked, behold a --------- wind came out of the North", o: ["Gentle", "Stormy", "Cold", "Silent"], a: 1 },
+                    { q: "In Ezekiel's first vision how many creatures were there and how many faces did each have?", o: ["2 creatures with 2 faces", "4 creatures with 4 faces", "6 creatures with 3 faces", "4 creatures with 2 faces"], a: 1 },
+                    { q: "For how many days did Ezekiel lie on his left side as a sign against Israel?", o: ["40 days", "70 days", "390 days", "120 days"], a: 2 },
+                    { q: "What did God tell Ezekiel to use as fuel to bake bread as a sign?", o: ["Wood", "Coal", "Human excrement, later cow dung", "Oil"], a: 2 },
+                    { q: "What did the Dry bones in Ezekiel 37 represent?", o: ["The nations", "The whole house of Israel", "The priests", "The Gentiles"], a: 1 },
+                    { q: "What did God say he would give his people instead of a heart of stone?", o: ["A new temple", "A new heart and new spirit", "New land", "New laws"], a: 1 },
+                    { q: "I will put my ……..within you", o: ["Word", "Power", "Spirit", "Law"], a: 2 },
+                    { q: "……….and live! Said to the dry bones", o: ["Sing", "Prophesy", "Pray", "Rise"], a: 1 },
+                    { q: " …...after …… behold it comes Disaster", o: ["Night after day", "Evil after good", "Disaster after disaster", "War after peace"], a: 2 },
+                    { q: "You have despised my holy things and profaned my………..", o: ["Temple", "Name", "Sabbaths", "Priests"], a: 2 },
+                    { q: "What was given by God as a sign between God's people and God?", o: ["Circumcision", "Sabbaths", "Passover", "Rainbow"], a: 1 },
+                    { q: "Adjoining the territory of Naphtali from the East side to the West", o: ["Ephraim", "Manasseh", "Judah", "Dan"], a: 1 },
+                    { q: "Adjoining the territory of Ephraim from the East side to the West", o: ["Reuben", "Simeon", "Levi", "Gad"], a: 0 },
+                    { q: "Adjoining the territory of Asher from the East side to the West", o: ["Naphtali", "Dan", "Zebulun", "Issachar"], a: 0 },
+                    { q: "Adjoining the territory of Dan from the East side to the West", o: ["Asher", "Naphtali", "Manasseh", "Ephraim"], a: 0 },
+                    { q: "Adjoining the territory of Reuben from the East side to the West", o: ["Judah", "Simeon", "Levi", "Gad"], a: 0 },
+                    { q: "Adjoining the territory of Benjamin from the East side to the West", o: ["Simeon", "Judah", "Issachar", "Zebulun"], a: 0 },
+                    { q: "Adjoining the territory of Issachar from the East side to the West", o: ["Zebulun", "Gad", "Asher", "Dan"], a: 0 },
+                    { q: "Adjoining the territory of Gad to the South boundary shall run from...", o: ["Dan", "Tamar", "Beer-sheba", "Kadesh"], a: 1 },
+                    { q: "The length of the building which was on the north side was …..cubits and the breadth …….cubits", o: ["Fifty, fifty", "Hundred, fifty", "Seventy, thirty", "Hundred, hundred"], a: 1 },
+                    { q: "I will send fire on…...and those who dwell securely in the Coastland.", o: ["Gog", "Magog", "Edom", "Moab"], a: 1 },
+                    { q: "Who are the Consecrated Priests?", o: ["The Levites", "The sons of Zadok", "The sons of Aaron", "The Kohathites"], a: 1 },
+                    { q: "What was the name of Ezekiel's wife?", o: ["She is not named but called desire of my eyes", "Michal", "Huldah", "Zipporah"], a: 0 },
+                    { q: "How many years did Ezekiel prophesy the punishment of Egypt would last?", o: ["70 years", "40 years", "30 years", "25 years"], a: 1 },
+                    { q: "I will make…...a pasture for camels", o: ["Rabbah", "Damascus", "Tyre", "Sidon"], a: 0 },
+                    { q: "After he is defiled he shall count for himself …...days and then he shall be clean.", o: ["Three", "Seven", "Fourteen", "Forty"], a: 1 },
+                    { q: "The sword is ……….., pestilence and famine are within.", o: ["Without", "Above", "Below", "Near"], a: 0 },
+                    { q: "All the hands are ……….and all knees weak as water", o: ["Strong", "Feeble", "Cold", "Lifting"], a: 1 },
+                    { q: "For I assign to you a number of days, equals to the number of years of their punishment", o: ["120 days", "390 days", "40 days", "70 days"], a: 1 },
+                    { q: "How much food was Ezekiel supposed to eat by weight?", o: ["10 shekels", "20 shekels", "30 shekels", "50 shekels"], a: 1 },
+                    { q: "What was supposed to be used to bake barley Cake?", o: ["Wood", "Human dung", "Cow dung", "Oil"], a: 1 },
+                    { q: "You eat the fat, you clothe yourselves with the wool you slaughter the fatling but you do not feed the sheep. Chapter and verse", o: ["Chapter 34v3", "Chapter 33v1", "Chapter 36v2", "Chapter 37v5"], a: 0 },
+                    { q: "I will make Mount Seir a waste and a desolation I will cut off from it all who come and go. Chapter and verse", o: ["Chapter 35v7", "Chapter 34v10", "Chapter 36v5", "Chapter 37v1"], a: 0 },
+                    { q: "Be ready and keep ready, you and all the hosts that are assembled about you, and be a guard for them. Chapter and Verse", o: ["Chapter 38v7", "Chapter 37v20", "Chapter 39v5", "Chapter 40v1"], a: 0 },
+                    { q: "As I live says the Lord this proverb shall no more be used by you in Israel Chapter and verse", o: ["Chapter 18v3", "Chapter 17v5", "Chapter 19v2", "Chapter 20v1"], a: 0 },
+                    { q: "What is the proverb referred to: The fathers have eaten sour grapes and the children’s teeth are set on edge?", o: ["Chapter 18v2", "Chapter 17v10", "Chapter 16v44", "Chapter 15v3"], a: 0 },
+                    { q: "Why is a sword polished?", o: ["That it may shine", "That it may be handled", "That it may cut wood", "That it may be sold"], a: 1 },
+                    { q: "Oholah was from which city?", o: ["Jerusalem", "Samaria", "Babylon", "Nineveh"], a: 1 },
+                    { q: "What colour were Warriors clothed with?", o: ["Red", "Purple", "Blue", "White"], a: 1 },
+                    { q: "What is Tyre likened to which is in the book of Genesis?", o: ["Babylon", "Eden", "Zion", "Sodom"], a: 1 },
+                    { q: "I will scatter the …..among the Nations and disperse them throughout the lands", o: ["Israelites", "Egyptians", "Ammonites", "Moabites"], a: 1 }
+                ]
+            },
+            revelation: {
+                name: "Book of Revelation",
+                questions: [
+                    { q: "Who witnessed the word of God and the testimony of Jesus Christ?", o: ["Peter", "John", "Paul", "James"], a: 1 },
+                    { q: "What promise is given to the one who reads aloud the word of God?", o: ["Peace", "Blessing / to be blessed", "Wisdom", "Strength"], a: 1 },
+                    { q: "______ foul spirits like frogs.", o: ["Two", "Three", "Four", "Seven"], a: 1 },
+                    { q: "The revelation was directed to how many churches that are in Asia?", o: ["5", "7", "12", "3"], a: 1 },
+                    { q: "Grace is promised him who was and is to do what?", o: ["Stay", "Come", "Go", "Wait"], a: 1 },
+                    { q: "How many years was the devil bound?", o: ["100 years", "500 years", "1000 years", "40 years"], a: 2 },
+                    { q: "According to Chapter 1v8 'I am the – and the -.'", o: ["Beginning and End", "Alpha and Omega", "First and Last", "Lord and God"], a: 1 },
+                    { q: "The word of Him who holds the seven stars in his right hand… To which church were these words written to?", o: ["Smyrna", "Ephesus", "Pergamum", "Thyatira"], a: 1 },
+                    { q: "What is the last word in the book of Revelation?", o: ["Amen", "Come", "Lord", "End"], a: 0 },
+                    { q: "Which church is neither cold nor hot?", o: ["Laodicea", "Sardis", "Philadelphia", "Ephesus"], a: 0 },
+                    { q: "Where do we find the verse 'I am the Alpha and Omega says the Lord God, who is and who was and who is to come, the Almighty'?", o: ["1v8", "22v13", "21v6", "4v8"], a: 0 },
+                    { q: "Spell ARMAGEDDON", o: ["ARMAGEDON", "ARMAGED'DON", "ARMAGEDDON", "ARMEGEDDON"], a: 2 },
+                    { q: "In which chapters do we find the letters to the seven churches?", o: ["1&2", "2&3", "3&4", "1&3"], a: 1 },
+                    { q: "What did the first living creature look like?", o: ["Ox", "Lion", "Eagle", "Man"], a: 1 },
+                    { q: "From which tribe did the conqueror to open the scroll and the seven seals come from?", o: ["Levi", "Judah", "Benjamin", "Ephraim"], a: 1 },
+                    { q: "What is the name of the fallen star?", o: ["Wormwood", "Mordred", "Lucifer", "Abaddon"], a: 0 },
+                    { q: "To the church of Thyatira, the son of God has eyes like –", o: ["Fire", "A flame of fire", "Lightning", "Coals"], a: 1 },
+                    { q: "What is the name of the king of locusts?", o: ["Abaddon/Apollyon", "Beelzebub", "Satan", "Death"], a: 0 },
+                    { q: "For how long were witnesses granted power to prophecy?", o: ["1260 days", "42 months", "3.5 years", "All of the above"], a: 3 },
+                    { q: "Which song did those who conquered the beast and his image sing?", o: ["Moses", "David", "Lamb", "Zion"], a: 0 },
+                    { q: "Name 3 people who hid in caves and mountains when the 6th seal was opened?", o: ["Kings, priests, elders", "Great men, generals, rich, strong, slave, free", "Angels, saints, prophets", "Jews, Gentiles, Romans"], a: 1 },
+                    { q: "Where did the angel with the seal of the living God ascend from?", o: ["Heaven", "The rising of the sun", "The sea", "The earth"], a: 1 },
+                    { q: "To which church were these words written 'the words of the first and last who died and came to life ….'", o: ["Ephesus", "Smyrna", "Pergamum", "Thyatira"], a: 1 },
+                    { q: "How many were killed by the 3 plagues?", o: ["A quarter", "A third of mankind", "Half", "All"], a: 1 },
+                    { q: "Fill in 'And the twelve gates were ____ twelve pearls'", o: ["Made of", "Each one of", "Covered with", "Gated by"], a: 1 },
+                    { q: "Which river did the 6th angel pour his bowl in?", o: ["Nile", "Jordan", "Euphrates", "Tigris"], a: 2 },
+                    { q: "Which angel poured his bowl on the sun?", o: ["Second", "Third", "Fourth", "Fifth"], a: 2 },
+                    { q: "What are the nations that are in the four corners of the earth?", o: ["Gog and Magog", "Assyria and Babylon", "Medes and Persians", "Egypt and Edom"], a: 0 },
+                    { q: "When the 1st angel blew the trumpet what burnt up?", o: ["A third of the sea", "A third of the earth", "A third of the trees", "A third of the stars"], a: 1 },
+                    { q: "Describe the locusts in chapter 8: They had faces like -----hair like ----, scales like ----'", o: ["Lion, lion, bronze", "Human faces, women’s, iron breastplates", "Eagle, serpent, gold", "Man, lion, iron"], a: 1 },
+                    { q: "What did the rider of the black horse have in his hand?", o: ["Sword", "Balance", "Bow", "Seal"], a: 1 },
+                    { q: "In chapter 14, what did the angel flying in the midst of heaven proclaim?", o: ["Judgment", "An eternal gospel", "The fall of Babylon", "Woe"], a: 1 },
+                    { q: "In which chapter do we find the mention of the Book of life?", o: ["Chapter 19", "Chapter 20", "Chapter 21", "Chapter 22"], a: 1 },
+                    { q: "Where do we find the words woe,woe,woe?", o: ["Chapter 7v13", "Chapter 8v13", "Chapter 9v13", "Chapter 10v13"], a: 1 },
+                    { q: "‘Blessed and holy is him who shares in the ____’", o: ["Second coming", "First resurrection", "Millennium", "Judgment"], a: 1 },
+                    { q: "According to the order in chapter 7 which tribe is mentioned 5th?", o: ["Judah", "Reuben", "Simeon", "Levi"], a: 2 },
+                    { q: "In chapter 20, who else is in the lake of fire and sulphur?", o: ["Satan only", "Beast and false prophets", "Death and Hades", "Kings of earth"], a: 1 },
+                    { q: "For how many months was the leopard like beast to exercise Authority?", o: ["30 months", "42 months", "60 months", "1260 months"], a: 1 },
+                    { q: "What will be added to him who adds anything to the words of the prophecy?", o: ["Blessings", "Plagues", "Curses", "Wisdom"], a: 1 },
+                    { q: "What is the second death?", o: ["Physical death", "Lake of fire", "Separation from God", "Sleep"], a: 1 },
+                    { q: "What did the beast which rose out of the earth make the earth and its inhabitants worship?", o: ["The dragon", "The 1st beast", "The image", "The Lamb"], a: 1 },
+                    { q: "How long did it take for Babylon to be laid waste?", o: ["One day", "One hour", "One week", "One month"], a: 1 },
+                    { q: "Who is the root and offspring of David?", o: ["David", "Solomon", "Jesus", "Michael"], a: 2 },
+                    { q: "In the new city what is the Lord God Almighty and the Lamb?", o: ["Temple", "Light", "King", "Shepherd"], a: 0 },
+                    { q: "What is the number of the beast which rose out of the earth?", o: ["616", "666", "777", "888"], a: 1 },
+                    { q: "What have those standing beside the sea of glass with harps of God conquered?", o: ["Death", "The beast and its image", "Sin", "Babylon"], a: 1 },
+                    { q: "How many portents appear in the book of Revelation?", o: ["2", "3", "7", "12"], a: 1 },
+                    { q: "When the 7th angel poured his bowl into the air, what did the loud voice say?", o: ["It is begun", "It is done", "Come quickly", "Behold"], a: 1 },
+                    { q: "Who stood upon mount Zion?", o: ["Moses and Elijah", "Lamb, 144000", "24 elders", "Angels"], a: 1 },
+                    { q: "How many times do we find the word 3rd in chapter 8 in reference to the 1st four angels?", o: ["4 times", "6 times", "8 times", "12 times"], a: 1 },
+                    { q: "Who says in her heart, ‘A queen I sit’?", o: ["Jerusalem", "Babylon", "Zion", "Smyrna"], a: 1 }
+                ]
+            },
+            acts: {
+                name: "Book of Acts",
+                questions: [
+                    { q: "Who wrote the book of Acts?", o: ["Paul", "Luke", "Mark", "John"], a: 1 },
+                    { q: "To whom is the book of Acts addressed?", o: ["Theophilus", "Timothy", "Titus", "Philemon"], a: 0 },
+                    { q: "How many days did Jesus show Himself alive after His passion?", o: ["30 days", "40 days", "50 days", "100 days"], a: 1 },
+                    { q: "Where were the disciples told to wait for the promise of the Father?", o: ["Bethlehem", "Jerusalem", "Galilee", "Samaria"], a: 1 },
+                    { q: "Who replaced Judas Iscariot as an apostle?", o: ["Barnabas", "Matthias", "Silas", "Timothy"], a: 1 },
+                    { q: "On what day did the Holy Spirit descend upon the disciples?", o: ["Passover", "Day of Pentecost", "Sabbath", "Feast of Tabernacles"], a: 1 },
+                    { q: "What did the Holy Spirit’s presence sound like?", o: ["Thunder", "A rushing mighty wind", "Silence", "Trumpet"], a: 1 },
+                    { q: "What appeared over the heads of the disciples?", o: ["Dove", "Tongues of fire", "Cloud", "Lightning"], a: 1 },
+                    { q: "How many people were baptized after Peter’s sermon in Acts 2?", o: ["About 1,000", "About 3,000 souls", "About 5,000", "About 500"], a: 1 },
+                    { q: "Who was the lame man healed by Peter and John?", o: ["Bartimaeus", "A man at the Beautiful Gate", "Aeneas", "Saul"], a: 1 },
+                    { q: "In Acts 1:8, what are the three geographical locations for witnessing?", o: ["Jerusalem, Judea and Samaria, ends of the earth", "Galilee, Judea, Rome", "Israel, Egypt, Babylon", "Jerusalem, Antioch, Rome"], a: 0 },
+                    { q: "What is the meaning of 'Akel Dama'?", o: ["Field of Peace", "Field of Blood", "Field of Hope", "Field of Death"], a: 1 },
+                    { q: "What criterion was needed to replace Judas?", o: ["Must be a Levite", "Must have accompanied them from John’s baptism to Ascension", "Must be over 30", "Must be from Jerusalem"], a: 1 },
+                    { q: "What did the people mockingly say about the apostles on Pentecost?", o: ["They are drunk", "They are full of new wine", "They are mad", "They are prophets"], a: 1 },
+                    { q: "Which prophet did Peter quote to explain Pentecost?", o: ["Isaiah", "Joel", "Jeremiah", "Ezekiel"], a: 1 },
+                    { q: "What was the name of the gate where the lame man sat?", o: ["Golden Gate", "Beautiful Gate", "Sheep Gate", "Fish Gate"], a: 1 },
+                    { q: "How old was the man healed at the Beautiful gate?", o: ["Over 30 years old", "Over 40 years old", "Over 50 years old", "Over 60 years old"], a: 1 },
+                    { q: "What was Barnabas’ actual name and meaning?", o: ["Saul; Persecutor", "Joses/Joseph; Son of Encouragement", "Simon; Rock", "John; Beloved"], a: 1 },
+                    { q: "What did Ananias and Sapphira lie about?", o: ["Their age", "The price of the land", "Their offering", "Their faith"], a: 1 },
+                    { q: "Who warned the Sanhedrin not to fight against God?", o: ["Nicodemus", "Gamaliel", "Joseph of Arimathea", "Caiaphas"], a: 1 },
+                    { q: "What did Jesus say to the disciples’ last question about restoring the kingdom?", o: ["Soon", "It is not for you to know times or seasons", "In 3 days", "When I return"], a: 1 },
+                    { q: "How did Judas die according to Peter?", o: ["Hanged himself", "Fell headlong, burst open", "Stoned", "Sick"], a: 1 },
+                    { q: "Name three of the nations listed present at Pentecost.", o: ["Egypt, Libya, Rome", "Parthians, Medes, Elamites", "Greece, Syria, Persia", "Spain, Italy, France"], a: 1 },
+                    { q: "What is the significance of the 3000 converts in Acts 2 in relation to Moses?", o: ["3000 saved", "3000 died at the Golden Calf - Grace vs Law", "3000 years passed", "3000 prophecies"], a: 1 },
+                    { q: "What did Peter tell the Sanhedrin was the only name under heaven by which we must be saved?", o: ["Moses", "Jesus Christ of Nazareth", "David", "Abraham"], a: 1 },
+                    { q: "Why did the apostles rejoice after being beaten in Acts 5?", o: ["They were freed", "Counted worthy to suffer for His name", "They won", "They escaped"], a: 1 },
+                    { q: "What was the reason the Grecian widows were neglected?", o: ["No food", "Daily distribution", "No money", "Language barrier"], a: 1 },
+                    { q: "Which synagogue members disputed with Stephen?", o: ["Pharisees and Sadducees", "Libertines, Cyrenians, Alexandrians, Cilicia, Asia", "Essenes", "Zealots"], a: 1 },
+                    { q: "How does Stephen describe the death of a believer?", o: ["Died", "Fell asleep", "Went home", "Passed on"], a: 1 },
+                    { q: "Who did Philip say he was preaching to in Samaria?", o: ["Moses", "Christ", "Elijah", "John"], a: 1 },
+                    { q: "What was the name of the place where they went up to the upper room?", o: ["Mount Zion", "Mount Olivet", "Mount Sinai", "Mount Moriah"], a: 1 },
+                    { q: "How far was the distance from Jerusalem to the place they went up?", o: ["One mile", "A Sabbath day's journey", "Two days journey", "Three days journey"], a: 1 },
+                    { q: "How many names are listed of the apostles in the upper room?", o: ["Ten", "Eleven", "Twelve", "Thirteen"], a: 1 },
+                    { q: "Who was the woman listed as being in the upper room?", o: ["Martha", "Mary, the mother of Jesus", "Mary Magdalene", "Salome"], a: 1 },
+                    { q: "In Peter's speech Acts 1, which two psalms did he quote?", o: ["Psalms 22 and 23", "Psalms 69 and 109", "Psalms 2 and 110", "Psalms 51 and 103"], a: 1 },
+                    { q: "What was the name of the method used to pick Matthias?", o: ["Vote", "Lots", "Drawing straws", "Appointment"], a: 1 },
+                    { q: "In Acts 2:23, Peter says Jesus was delivered by the determined counsel of whom?", o: ["The Jews", "God", "Pilate", "Herod"], a: 1 },
+                    { q: "Who did Peter say was not ascended into the heavens?", o: ["Moses", "David", "Abraham", "Elijah"], a: 1 },
+                    { q: "At what time did Peter and John go to the temple to pray?", o: ["Third hour", "Sixth hour", "Ninth hour 3:00 PM", "Twelfth hour"], a: 2 },
+                    { q: "Who is the only person in Acts, besides the apostles, who is explicitly stated to have healed the sick in the same manner as the apostles?", o: ["Stephen", "Philip", "Barnabas", "Silas"], a: 1 },
+                    { q: "In Acts 1:19, what is the exact phrase used to describe the native language of the people?", o: ["Mother tongue", "Proper tongue", "Native speech", "Hebrew"], a: 1 },
+                    { q: "What was the name of the man who was the first to fall in the 40-man plot?", o: ["Saul", "None, the plot failed", "Tertullus", "Felix"], a: 1 },
+                    { q: "Which chapter and verse mentions Paul for the first time?", o: ["Acts 7:58", "Acts 8:1", "Acts 9:1", "Acts 13:1"], a: 0 },
+                    { q: "Who was the 'believer from the sect of Pharisees' mentioned in Acts 15?", o: ["Not named", "Paul", "Barnabas", "Peter"], a: 0 },
+                    { q: "What did Paul say he was, just before he was converted?", o: ["Sadducee", "Pharisee", "Tax collector", "Fisherman"], a: 1 },
+                    { q: "What was the exact name of the ship that brought Paul from Crete?", o: ["Not mentioned, they changed ships in Myra", "Alexandria", "Caesar's ship", "Adramyttium"], a: 0 },
+                    { q: "How many people were killed when the prison door was opened?", o: ["None", "One", "All", "Two"], a: 0 },
+                    { q: "Who was the first to be told about the resurrection of Jesus?", o: ["Mary", "The disciples", "Peter", "John"], a: 1 },
+                    { q: "What was the occupation of the person who gave the 'We' passage?", o: ["Soldier", "Physician", "Tentmaker", "Scribe"], a: 1 },
+                ]
+            },
+            obadiah: {
+                name: "Book of Obadiah",
+                questions: [
+                    { q: "The book of Obadiah is between which books?", o: ["Amos and Jonah", "Joel and Micah", "Hosea and Joel", "Jonah and Micah"], a: 0 },
+                    { q: "The first word in chapter 1 is….", o: ["The", "Vision", "Obadiah", "Lord"], a: 0 },
+                    { q: "How many verses are in the book of Obadiah?", o: ["15", "21", "25", "12"], a: 1 },
+                    { q: "Which nation is mentioned in verse 1?", o: ["Babylon", "Edom", "Moab", "Assyria"], a: 1 },
+                    { q: "Spell the name of the author.", o: ["Obadiah", "Obadiahh", "Obadiyah", "Obadyah"], a: 0 },
+                    { q: "Spell Phoenicia. verse 20", o: ["Phoenicia", "Phoeni’cia", "Phoeniciah", "Phoenica"], a: 1 },
+                    { q: "The house of ……… shall be a fire.", o: ["Jacob", "Esau", "Israel", "Joseph"], a: 0 },
+                    { q: "Spell Shephelah.", o: ["Shephelah", "Shephe’lah", "Shephelahh", "Shefela"], a: 1 },
+                    { q: "The house of Joseph shall be a……..", o: ["Flame", "Light", "Fire", "Torch"], a: 0 },
+                    { q: "The last word in chapter is ……", o: ["Lord’s", "Lord", "Amen", "End"], a: 0 },
+                    { q: "According to verse 2 what will the Lord do to Edom?", o: ["Bless her", "Make her small", "Destroy her", "Exile her"], a: 1 },
+                    { q: "Where does Edom dwell according to verse 3?", o: ["In the valley", "In the clefts of the rock", "On the mountain", "By the sea"], a: 1 },
+                    { q: "According to verse 6, who has pillaged?", o: ["Jacob", "Esau", "Israel", "Judah"], a: 1 },
+                    { q: "In verse 8, what will the Lord destroy out of Edom?", o: ["The army", "The wise men", "The kings", "The prophets"], a: 1 },
+                    { q: "Which mount is mentioned in verse 9?", o: ["Mount Zion", "Mount Esau", "Mount Sinai", "Mount Carmel"], a: 1 },
+                    { q: "According to verse 17, where will those that escape be?", o: ["Mount Zion", "Mount Esau", "Jerusalem", "Babylon"], a: 0 },
+                    { q: "The 'Day of the Lord' is near upon all the ……….. verse 15", o: ["Nations", "Tribes", "Peoples", "Kings"], a: 0 },
+                    { q: "How is Edom related to Jacob?", o: ["Brother", "Cousin", "Enemy", "Father"], a: 0 },
+                    { q: "Who will possess the land of Gilead?", o: ["Judah", "Benjamin", "Reuben", "Gad"], a: 1 },
+                    { q: "In verse 4, even if you set your nest among the ………., I will bring you down.", o: ["Mountains", "Stars", "Clouds", "Trees"], a: 1 },
+                    { q: "State the verse which says, 'For the day of the Lord is near upon all the nations'.", o: ["Verse 12", "Verse 15", "Verse 18", "Verse 21"], a: 1 },
+                    { q: "How many survivors shall remain of the house of Esau?", o: ["One hundred", "None", "One thousand", "A remnant"], a: 1 },
+                    { q: "‘For as you have drunk upon my …… mountain all the nations round about shall drink, they shall drink, and ………’", o: ["Holy, stagger", "High, fall", "Great, perish", "Sacred, rejoice"], a: 0 },
+                    { q: "‘You should not have entered the gate of my people in the day of his calamity…’ Name the verse.", o: ["Verse 12", "Verse 13", "Verse 14", "Verse 15"], a: 2 },
+                    { q: "Complete: ‘How Esau has been pillaged, his treasures……..’ verse 6", o: ["Hidden", "Sought out", "Destroyed", "Taken"], a: 1 },
+                    { q: "Complete: ‘And the……shall be the Lord’s.’ verse 21", o: ["Kingdom", "People", "Land", "Glory"], a: 0 },
+                    { q: "Why will the Saviours go up to Mount Zion?", o: ["To worship", "To rule Mount Esau", "To build", "To pray"], a: 1 },
+                    { q: "Which bird is Edom likened to in verse 4?", o: ["Eagle", "Vulture", "Owl", "Hawk"], a: 0 },
+                    { q: "‘And your mighty men shall be destroyed,…….. so that every man from Mount Esau will be cut off.’", o: ["O Teman", "O Edom", "O Jacob", "O Israel"], a: 0 },
+                    { q: "What will happen to the stubble of the house of Esau? verse 18", o: ["They shall be saved", "They shall be burned and consumed", "They shall escape", "They shall repent"], a: 1 },
+                    { q: "Complete: ‘Though you ……like an eagle, though your nest is among the stars, thence I will bring you …...’ verse 4", o: ["Soar aloft, down", "Fly high, up", "Rise, low", "Climb, down"], a: 0 },
+                    { q: "What does the Lord say according to verse 8?", o: ["I will bless Edom", "Will I not on that day destroy the wise men of Edom and understanding out of Mount Esau?", "I will save Edom", "I will forgive Edom"], a: 1 },
+                    { q: "According to verse 11, who carried his gates and cast lots for Jerusalem?", o: ["Romans", "Foreigners", "Babylonians", "Assyrians"], a: 1 },
+                    { q: "Complete: ‘the house of Jacob shall …… their own…….’ verse 17", o: ["Possess, possessions", "Take, land", "Inherit, kingdom", "Rule, nation"], a: 0 },
+                    { q: "Name three groups of people mentioned in verse 5.", o: ["Thieves, plunderers, grape gatherers", "Kings, priests, prophets", "Soldiers, slaves, traders", "Jews, Gentiles, Romans"], a: 0 },
+                    { q: "Name 3 things Edom should not have done according to verse 13.", o: ["Not entered the gate, not gloated, not looted", "Not fight, not lie, not steal", "Not speak, not act, not think", "Not worship, not pray, not fast"], a: 0 },
+                    { q: "Edom is likened to an eagle that sets its …..among the…….. verse 4", o: ["Nest, stars", "Nest, mountains", "Home, clouds", "Den, rocks"], a: 0 },
+                    { q: "Name the 3 groups of people mentioned in verse 7.", o: ["Allies, confederates, trusted friends", "Enemies, strangers, foes", "Brothers, sisters, cousins", "Kings, lords, princes"], a: 0 },
+                    { q: "What is the last word of verse 14?", o: ["Distress", "Calamity", "Sorrow", "Pain"], a: 0 },
+                    { q: "What is the first word of verse 21?", o: ["Saviours", "Lord", "And", "Then"], a: 0 },
+                    { q: "What has the pride of Edom’s heart done to them?", o: ["Saved them", "Deceived them", "Blessed them", "Strengthened them"], a: 1 },
+                    { q: "If grape gatherers came to you, would they not leave you ………. verse 5", o: ["Nothing", "Gleanings", "All", "Grapes"], a: 1 },
+                    { q: "As you have done, it shall be done to you, your …….. shall return on your ……… verse 15", o: ["Deed, head", "Sin, soul", "Word, mouth", "Act, hands"], a: 0 },
+                    { q: "How far will the exiles in Halah possess Phoenicia? verse 20", o: ["To Tyre", "To Zarephath", "To Sidon", "To Damascus"], a: 1 },
+                    { q: "In which verse do we find: ‘you should not have looted his goods in the day of his calamity’?", o: ["Verse 9", "Verse 10", "Verse 11", "Verse 12"], a: 1 },
+                    { q: "According to verse 11, on the day that the strangers carried off Jacob’s wealth what did Edom do?", o: ["Helped", "Stood aloof", "Fought", "Fled"], a: 1 },
+                    { q: "‘For the ………. done to your brother Jacob……. shall cover you.’ verse 10", o: ["Violence, shame", "Hate, guilt", "War, blood", "Lie, curse"], a: 0 },
+                    { q: "Your …… have deceived you and …… against you. verse 7", o: ["Confederates, prevailed", "Friends, failed", "Brothers, left", "Allies, betrayed"], a: 0 },
+                    { q: "What specific group of people from Mount Esau will be ‘cut off by slaughter’? verse 9", o: ["Every man", "Every woman", "Every child", "Every elder"], a: 0 },
+                    { q: "What will be destroyed from Mount Esau?", o: ["The wise men", "The understanding", "The army", "The city"], a: 1 }
+                ]
+            },
+            greatcontroversy: {
+                name: "The Great Controversy",
+                questions: [
+                    { q: "Spell the word: Penance", o: ["Penance", "Penence", "Pennance", "Penancee"], a: 0 },
+                    { q: "What is the title of Chapter 32?", o: ["Snares of Satan", "The Final Warning", "God's People Delivered", "Agency of Evil Spirits"], a: 0 },
+                    { q: "Who is the 'Prince of Life'?", o: ["Michael", "Jesus Christ", "Gabriel", "Holy Spirit"], a: 1 },
+                    { q: "Who is the 'prince of darkness'?", o: ["Satan", "Death", "Beast", "Antichrist"], a: 0 },
+                    { q: "What is the title of Chapter 38?", o: ["The Final Warning", "Liberty of Conscience Threatened", "God's People Delivered", "The Loud Cry"], a: 0 },
+                    { q: "What is the title of Chapter 40?", o: ["God's People Delivered", "The Time of Trouble", "The Millennium", "The New Earth"], a: 0 },
+                    { q: "Who is the great adversary of man?", o: ["Death", "Satan", "Sin", "The Beast"], a: 1 },
+                    { q: "The Word of God is a ______ to our feet.", o: ["Light", "Lamp", "Guide", "Path"], a: 1 },
+                    { q: "What is the only safeguard against the wiles of Satan?", o: ["Prayer", "The Bible", "Faith", "Church"], a: 1 },
+                    { q: "Spell the word: Spiritualism", o: ["Spiritualism", "Spiritualizm", "Spiritualisim", "Spirtualism"], a: 0 },
+                    { q: "Who are the 'ministering spirits' sent to work for the heirs of salvation?", o: ["Angels", "Holy Angels", "Saints", "Prophets"], a: 1 },
+                    { q: "Satan's work is to ______ the minds of men.", o: ["Open", "Blind/Deceive", "Heal", "Save"], a: 1 },
+                    { q: "What is the title of Chapter 34?", o: ["Can Our Dead Speak to Us?", "The Time of Trouble", "The Sanctuary", "The Law"], a: 0 },
+                    { q: "What was the first lie told to man in Eden?", o: ["You will die", "Ye shall not surely die", "You will be gods", "God is angry"], a: 1 },
+                    { q: "True or False: Satan has power to compel anyone to sin.", o: ["True", "False", "Sometimes", "Only believers"], a: 1 },
+                    { q: "What is the title of Chapter 31?", o: ["Agency of Evil Spirits", "The Law of God", "The Sanctuary", "The Sabbath"], a: 0 },
+                    { q: "The investigative judgment determines who are ______ to share in the resurrection of the just.", o: ["Ready", "Worthy", "Saved", "Chosen"], a: 1 },
+                    { q: "What is the title of Chapter 35?", o: ["Liberty of Conscience Threatened", "The Final Warning", "The Loud Cry", "The Time of Trouble"], a: 0 },
+                    { q: "Who is the author of The Great Controversy?", o: ["James White", "Ellen G. White", "Joseph Bates", "Uriah Smith"], a: 1 },
+                    { q: "According to Chapter 31, who were the 'demoniacs' of the New Testament?", o: ["Sick people", "Persons possessed by evil spirits/fallen angels", "Sinners", "Pagans"], a: 1 },
+                    { q: "What is the 'masterpiece' of Satan's deceptions?", o: ["Evolution", "Modern Spiritualism", "Catholicism", "Protestantism"], a: 1 },
+                    { q: "What is the 'wine of Babylon'?", o: ["Literal wine", "False doctrines/errors", "Pleasure", "Riches"], a: 1 },
+                    { q: "According to Chapter 33, what is the 'first great deception'?", o: ["Evolution", "The belief that man is naturally immortal", "Sunday sacredness", "Spiritualism"], a: 1 },
+                    { q: "What two great errors will Satan use to bring people under his deceptions?", o: ["Evolution and Atheism", "The immortality of the soul and Sunday sacredness", "Catholicism and Islam", "Judaism and Buddhism"], a: 1 },
+                    { q: "'To the law and to the ______: if they speak not according to this word, it is because there is no light in them.'", o: ["Prophets", "Testimony - Isaiah 8:20", "Apostles", "Church"], a: 1 },
+                    { q: "What does the 'Third Angel's Message' warn against?", o: ["Idolatry", "The worship of the beast and his image", "Adultery", "Theft"], a: 1 },
+                    { q: "In Chapter 36, what is described as the 'only shield' against the coming storm?", o: ["Prayer", "The truth of God's Word", "Faith", "Angels"], a: 1 },
+                    { q: "What is the 'mark of the beast'?", o: ["666", "The rejection of God's Sabbath in favor of a human institution/Sunday", "A tattoo", "A chip"], a: 1 },
+                    { q: "The papacy is the ______ of the beast.", o: ["Image", "Head", "Body", "Not the papacy; the papacy is the Beast"], a: 3 },
+                    { q: "What is the 'image to the beast'?", o: ["Catholicism", "A body of apostate Protestantism that uses civil power to enforce its dogmas", "Islam", "Spiritualism"], a: 1 },
+                    { q: "During the 'Time of Trouble,' God's people will be hidden in the ______ of His power.", o: ["Temple", "Pavilion/Shadow", "Mountain", "City"], a: 1 },
+                    { q: "According to Chapter 32, what is one of Satan's most successful objects?", o: ["To kill", "To lead men to believe that he does not exist", "To deceive", "To tempt"], a: 1 },
+                    { q: "What is the 'Great Controversy' primarily between?", o: ["Good and Evil", "Christ and Satan", "Church and State", "Heaven and Hell"], a: 1 },
+                    { q: "In the end, what is the test of loyalty to God?", o: ["Faith", "Keeping the Commandments, especially the Sabbath", "Love", "Hope"], a: 1 },
+                    { q: "Who is the 'King of kings'?", o: ["David", "Jesus Christ", "Michael", "Gabriel"], a: 1 },
+                    { q: "What happens to the wicked at the brightness of Christ's coming?", o: ["They repent", "They are destroyed", "They hide", "They flee"], a: 1 },
+                    { q: "Spell the word: Infallibility", o: ["Infallibility", "Infallibilty", "Infallibillity", "Infallibiliti"], a: 0 },
+                    { q: "What is the 'Loud Cry'?", o: ["The second coming", "The final powerful proclamation of the third angel's message", "The judgment", "The resurrection"], a: 1 },
+                    { q: "Where is the headquarters of the papacy located?", o: ["Jerusalem", "The Vatican/Rome", "Geneva", "London"], a: 1 },
+                    { q: "What does Chapter 35 state is the secret of the papacy’s power?", o: ["Money", "The union of church and state", "Tradition", "Miracles"], a: 1 },
+                    { q: "Explain the 'Jacob's Trouble' experience of God's people.", o: ["A time of joy", "A time of intense mental anguish and searching of heart to see if all sins are confessed", "A time of rest", "A time of peace"], a: 1 },
+                    { q: "According to Chapter 37, why are many people unable to discern the truth?", o: ["They are blind", "Because they have no love for the truth and prefer the opinions of men", "They are ignorant", "They are busy"], a: 1 },
+                    { q: "What is the significance of the 'seven last plagues'?", o: ["They are blessings", "They are the unmingled wrath of God poured out after probation closes", "They are warnings", "They are judgments"], a: 1 },
+                    { q: "How does Satan use 'science' and 'philosophy' to deceive?", o: ["By miracles", "By leading people to trust human reason above the Word of God", "By dreams", "By visions"], a: 1 },
+                    { q: "What role does the United States play in the final crisis according to Chapter 35?", o: ["It preaches the gospel", "It will enforce the worship of the beast/Sunday", "It remains neutral", "It protects the Sabbath"], a: 1 },
+                    { q: "According to Chapter 31, how do holy angels protect the righteous?", o: ["By fighting", "By encamping around them and shielding them from the 'unseen agencies of evil'", "By speaking", "By healing"], a: 1 },
+                    { q: "What is the 'shaking' among God's people caused by?", o: ["Persecution", "The straight testimony of the True Witness and the introduction of false theories", "War", "Famine"], a: 1 },
+                    { q: "Explain the term 'Protestantism' as used in Chapter 35.", o: ["A Catholic movement", "A movement that originally stood for the Bible as the only rule of faith, now drifting toward Rome", "A pagan movement", "A Jewish movement"], a: 1 },
+                    { q: "What is the purpose of the 'Time of Trouble'?", o: ["To punish", "To refine the character of God's people and demonstrate their total loyalty", "To destroy", "To test"], a: 1 }
+                ]
+            }
+        };
+
+        let currentName = "";
+        let currentUser = "";
+        let currentBook = "ezekiel";
+        let currentCategory = "test";
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let canAnswer = true;
+
+        function showScreen(screenId) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('results-screen').classList.add('hidden');
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function login() {
+            const nameInput = document.getElementById('username').value.trim();
+            const codeInput = document.getElementById('usercode').value.trim().toLowerCase();
+            const bookInput = document.getElementById('bookSelect').value;
+
+            if (!nameInput ||!codeInput) {
+                alert("Please enter both your Full Name and User-Code.");
+                return;
+            }
+
+            currentName = nameInput;
+            currentUser = codeInput;
+            currentBook = bookInput;
+
+            if (codeInput.startsWith("adv")) currentCategory = "adv";
+            else if (codeInput.startsWith("path")) currentCategory = "path";
+            else if (codeInput.startsWith("amb")) currentCategory = "amb";
+            else if (codeInput.startsWith("young")) currentCategory = "young";
+            else currentCategory = "test";
+
+            currentQuestions = questionSets[currentBook].questions;
+            currentQuestionIndex = 0;
+            score = 0;
+
+            showScreen('quiz-screen');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            canAnswer = true;
+            document.getElementById('welcome-message').innerText =
+                `Participant: ${currentName} | Book: ${questionSets[currentBook].name}`;
+
+            const qData = currentQuestions[currentQuestionIndex];
+            document.getElementById('quiz-title').innerHTML =
+                `Category: <span class="category-tag ${currentCategory}">${currentCategory.toUpperCase()}</span>`;
+            document.getElementById('progress').innerText =
+                `Question ${currentQuestionIndex + 1}/${currentQuestions.length}`;
+            document.getElementById('question-text').innerText = qData.q;
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = "";
+
+            qData.o.forEach((option, index) => {
+                const div = document.createElement('div');
+                div.className = "option";
+                div.onclick = () => selectOption(div, index);
+                div.innerText = option;
+                container.appendChild(div);
+            });
+        }
+
+        function selectOption(element, index) {
+            if (!canAnswer) return;
+            canAnswer = false;
+
+            const qData = currentQuestions[currentQuestionIndex];
+            const options = document.getElementById('options-container').children;
+
+            if (index === qData.a) {
+                element.classList.add('correct');
+                score++;
+            } else {
+                element.classList.add('wrong');
+                options[qData.a].classList.add('correct');
+            }
+
+            setTimeout(nextQuestion, 1500);
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < currentQuestions.length) {
+                loadQuestion();
+            } else {
+                saveResult();
+                alert(`Quiz complete, ${currentName}!\nBook: ${questionSets[currentBook].name}\nScore: ${score}/${currentQuestions.length}`);
+                viewresults();
+            }
+        }
+
+        function saveResult() {
+            let results = JSON.parse(localStorage.getItem('quiz_results')) || [];
+
+            let categoryName = "Test";
+            if (currentCategory === "adv") categoryName = "Adventurer";
+            if (currentCategory === "path") categoryName = "Pathfinder";
+            if (currentCategory === "amb") categoryName = "Ambassador";
+            if (currentCategory === "young") categoryName = "Senior Youth";
+
+            results.push({
+                name: currentName,
+                user: currentUser,
+                book: currentBook,
+                category: categoryName,
+                score: `${score}/${currentQuestions.length}`,
+                date: new Date().toLocaleDateString()
+            });
+            localStorage.setItem('quiz_results', JSON.stringify(results));
+        }
+
+        function viewresults() {
+            showScreen('results-screen');
+            filterResults('ALL');
+        }
+
+        function filterResults(cat) {
+            let results = JSON.parse(localStorage.getItem('quiz_results')) || [];
+            const listDiv = document.getElementById("results-list");
+            listDiv.innerHTML = "";
+
+            document.querySelectorAll('.filter-buttons button').forEach(btn => {
+                btn.classList.remove('filter-active');
+            });
+            document.getElementById('btn-' + cat).classList.add('filter-active');
+
+            if (cat!== 'ALL') {
+                results = results.filter(r => r.category === cat);
+            }
+
+            if (results.length === 0) {
+                listDiv.innerHTML = "<p style='text-align:center; color:#7f8c8d;'>No results yet for this level.</p>";
+            } else {
+                results.reverse().forEach(r => {
+                    let tagClass = r.category.toLowerCase().replace(" ", "");
+                    let bookName = questionSets[r.book]?.name || r.book || "Unknown";
+
+                    listDiv.innerHTML += `
+                        <div class="result-item">
+                            <strong>${r.name}</strong> <small>(${r.user.toUpperCase()})</small>
+                            <span class="category-tag ${tagClass}">${r.category}</span>
+                            <br>Book: ${bookName} | Score: <strong>${r.score}</strong> on ${r.date}
+                        </div>`;
+                });
+            }
+        }
+    </script>
+</body>
+</html>
