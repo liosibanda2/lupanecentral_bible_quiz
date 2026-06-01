@@ -6,29 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { font-family: arial, sans-serif; background: #f4f7fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-    .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 90%; max-width: 600px; }
+   .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 90%; max-width: 600px; }
         h2, h3 { text-align: center; color: #2c3e50; }
         input, select, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; }
         button { background: #4a5cf7; color: white; border: none; cursor: pointer; font-weight: bold; }
         button:hover { background: #3742fa; }
-    .option { background: #f0f0f0; padding: 12px; margin: 8px 0; border-radius: 8px; cursor: pointer; transition: 0.2s; }
-    .option:hover { background: #e0e0e0; }
-    .correct { background: #2ecc71!important; color: white; }
-    .wrong { background: #e74c3c!important; color: white; }
-    .hidden { display: none!important; }
-    .btn-secondary { background: #7f8c8d; }
-    .btn-secondary:hover { background: #636e72; }
-    .result-item { background: #f0f0f0; padding: 10px; margin: 5px 0; border-radius: 8px; font-size: 14px; }
-    .category-tag { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 12px; color: white; margin-left: 8px; font-weight: bold; }
-    .adventurer { background: #3498db; }
-    .pathfinder { background: #2ecc71; }
-    .ambassador { background: #e67e22; }
-    .senioryouth { background: #9b59b6; }
-    .test { background: #7f8c8d; }
-    .participant-welcome { text-align: center; font-style: italic; color: #34495e; font-weight: bold; margin-bottom: 15px; }
-    .filter-buttons { display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
-    .filter-buttons button { flex: 1; padding: 8px; font-size: 14px; min-width: 90px; }
-    .filter-active { outline: 2px solid #2c3e50; }
+   .option { background: #f0f0f0; padding: 12px; margin: 8px 0; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+   .option:hover { background: #e0e0e0; }
+   .correct { background: #2ecc71!important; color: white; }
+   .wrong { background: #e74c3c!important; color: white; }
+   .hidden { display: none!important; }
+   .btn-secondary { background: #7f8c8d; }
+   .btn-secondary:hover { background: #636e72; }
+   .result-item { background: #f0f0f0; padding: 10px; margin: 5px 0; border-radius: 8px; font-size: 14px; }
+   .category-tag { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 12px; color: white; margin-left: 8px; font-weight: bold; }
+   .adventurer { background: #3498db; }
+   .pathfinder { background: #2ecc71; }
+   .ambassador { background: #e67e22; }
+   .senioryouth { background: #9b59b6; }
+   .test { background: #7f8c8d; }
+   .participant-welcome { text-align: center; font-style: italic; color: #34495e; font-weight: bold; margin-bottom: 15px; }
+   .filter-buttons { display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
+   .filter-buttons button { flex: 1; padding: 8px; font-size: 14px; min-width: 90px; }
+   .filter-active { outline: 2px solid #2c3e50; }
         label { font-size: 14px; color: #34495e; font-weight: bold; margin-top: 10px; display: block; }
     </style>
 </head>
@@ -78,7 +78,7 @@
         <button class="btn-secondary" onclick="showScreen('login-screen')">Back to Login</button>
     </div>
 
-    <script>
+<script>
         const questionSets = {
             ezekiel: {
     name: "Book of Ezekiel",
@@ -303,7 +303,7 @@
         { q: "Who made Edom small among the nations?", o: ["The Lord God", "Nebuchadnezzar", "Israel", "Babylon"], a: 0 },
         { q: "Edom’s allies led him to the ______.", o: ["border", "desert", "mountain", "valley"], a: 0 }
     ]
-}
+            },
             greatcontroversy: {
     name: "The Great Controversy",
     questions: [
@@ -513,19 +513,20 @@
                 });
             }
         }
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => {
-        console.log('Service Worker registered');
-        // Show message when ready for offline
-        if(reg.active) {
-          setTimeout(() => alert('App ready for offline use. Load once, then works without internet'), 2000);
+
+        // Service Worker Registration - MUST be inside same script tag
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+             .then(reg => {
+                console.log('Service Worker registered');
+                if(reg.active) {
+                  setTimeout(() => alert('App ready for offline use. Load once, then works without internet'), 2000);
+                }
+              })
+             .catch(err => console.log('SW registration failed: ', err));
+          });
         }
-      })
-      .catch(err => console.log('SW registration failed: ', err));
-  });
-}
 </script>
 </body>
 </html>
